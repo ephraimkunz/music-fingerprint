@@ -1,0 +1,24 @@
+{
+  "name": "spotify-audio-features",
+  "version": "0.0.1",
+  "description": "Show the audio features of a track on Spotify",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.15.2",
+    "spotify-web-api-node": "^2.3.6",
+    "chart.js": "^2.5.0"
+  },
+  "engines": {
+    "node": "6.10.x"
+  },
+  "license": "MIT",
+  "keywords": [
+    "node",
+    "glitch",
+    "spotify",
+    "express"
+  ]
+}

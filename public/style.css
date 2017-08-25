@@ -1,0 +1,28 @@
+/* styles */
+/* called by your view template */
+
+#results {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  max-height: 30vh;
+}
+
+#results li {
+  color: skyblue;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media screen and (max-width: 900px) {
+  #results {
+    display: inline-block;
+    max-height: auto;
+  }
+}
+
+@media screen and (min-width: 1280px) {
+  #results {
+    max-height: 20vh;
+  }
+}

@@ -55,16 +55,30 @@ app.get("/isLoggedIn", function(request, response) {
 });
 
 app.get("/userSavedTracks", function(request, response) {
-  getSavedTracks(50, 0)
+  var promises = [];
+  const pageSize = 50;
+  getSavedTracks(pageSize, 0)
     .then(function(data) {
-      console.log(JSON.stringify(data.body.items));
-      response.send(data.body.items.map(function(item) {
+      var total = data.body.total;
+      var nextPage = 1; // Index of the page we are about to fetch
+      total -= pageSize; // Account for the page we just fetched
+      while(total > 0) {
+        promises.push(getSavedTracks(pageSize, nextPage * pageSize));
+        total -= pageSize;
+        nextPage ++;
+      }
+    
+      return Promise.all([data].concat(promises));
+  }).then(function(data) {
+    let items = [];
+    data.forEach(function(piece) {
+      items = items.concat(piece.body.items.map(function(item) {
         return item.track;
       }));
+    });
+    response.send(items);
   }, function(error) {
       console.log(JSON.stringify(error));
-  });
-});
 
 function getSavedTracks(limit, skip) {
   return spotifyApi.getMySavedTracks({limit: limit, skip: skip});
@@ -82,14 +96,22 @@ app.get("/callback", function(request, response) {
   }
 });
 
-app.get("/search", function (request, response) {
-  spotifyApi.searchTracks(request.query.query)
-  .then(function(data) {
-    console.log(data.body);
-    response.send(data.body);
-  }, function(err) {
-    console.log(err)
-  });
+
+function getSavedTracks(limit, skip) {
+  console.log('Limit: ' + limit + ', skip: ' + skip);
+  return spotifyApi.getMySavedTracks({limit: limit, offset: skip});
+}
+
+app.get("/callback", function(request, response) {
+  console.log("Callback called");
+  if (request && request.query && request.query.code) {
+    spotifyApi.authorizationCodeGrant(request.query.code)
+      .then(function(data) {
+        spotifyApi.setAccessToken(data.body['access_token']);
+        spotifyApi.setRefreshToken(data.body['refresh_token']);
+        response.redirect('/');
+    })
+  }
 });
 
 app.get("/features", function (request, response) {

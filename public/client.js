@@ -68,22 +68,35 @@ function getFeatures(id) {
 }
 
 $(function() {
-  let trackID = '';
-  let searchQuery = '';
   let resultIDs = [];
+  var isLoggedIn = false
   
-  $('form').submit(function(event) {
-    event.preventDefault();
-    searchQuery = '/search?query=' + $('input').val();
+  $.get('/isLoggedIn')
+    .then(function(data) {
+      if(data.loggedIn) {
+        console.log('User already logged in');
+        $.get('/userSavedTracks', function(data) {
+          $('#results').empty();
     
-    $.get(searchQuery, function(data) {
-      $('#results').empty();
-    
-      data.tracks.items.forEach(function(track, index) {
-        resultIDs.push(track.id);
-        let newEl = $('<li onClick="getFeatures(&apos;' + track.id + '&apos;)"></li>').text(track.name + '   |   ' + track.artists[0].name);
-        $('#results').append(newEl);
-      }); 
+          console.log(data);
+          data.forEach(function(track, index) {
+            resultIDs.push(track.id);
+            let newEl = $('<li onClick="getFeatures(&apos;' + track.id + '&apos;)"></li>').text(track.name + '   |   ' + track.artists[0].name);
+            $('#results').append(newEl);
+          }); 
+        }) ;
+      } else {
+        console.log('User not already logged in');
+        $('#sign-in-button').show();
+      }
+  });
+  
+  $("#sign-in-button").on('click', function(){
+    console.log('Login button pressed')
+    var loginUrl = $.get('/loginUrl', function(data) {
+      window.location = data['url'];
+      isLoggedIn = true;
     });
   });
+  
 });

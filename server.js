@@ -79,8 +79,23 @@ app.get("/userSavedTracks", function(request, response) {
     response.send(items);
   }, function(error) {
       console.log(JSON.stringify(error));
-  });
+
+function getSavedTracks(limit, skip) {
+  return spotifyApi.getMySavedTracks({limit: limit, skip: skip});
+}
+
+app.get("/callback", function(request, response) {
+  console.log("Callback called");
+  if (request && request.query && request.query.code) {
+    spotifyApi.authorizationCodeGrant(request.query.code)
+      .then(function(data) {
+        spotifyApi.setAccessToken(data.body['access_token']);
+        spotifyApi.setRefreshToken(data.body['refresh_token']);
+        response.redirect('/');
+    })
+  }
 });
+
 
 function getSavedTracks(limit, skip) {
   console.log('Limit: ' + limit + ', skip: ' + skip);
